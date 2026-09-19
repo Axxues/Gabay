@@ -1,4 +1,4 @@
-﻿import { readItems, readItem, createItem, updateItem } from '@likha-erp/likha-sdk';
+﻿import { readItems, readItem, createItem } from '@likha-erp/likha-sdk';
 import { likha } from '@/services/core/likhaClient';
 import type { Course, Module } from '@/services/lms/types/lms.types';
 import type { LikhaCourseEnrollment } from '@/services/core/types';
@@ -26,6 +26,7 @@ export function mapLikhaModuleToModule(item: any): Module {
     courseId: item.course_id,
     title: item.title,
     order: item.order || 1,
+    published: item.published !== false,
     items: Array.isArray(item.items) ? item.items : [],
   };
 }

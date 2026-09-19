@@ -28,7 +28,7 @@ export function mapDirectusUserToUser(dUser: any): User {
 export const authApi = {
   async login(payload: LoginPayload): Promise<LoginResponse> {
     try {
-      const authResult = await likha.login(payload.email, payload.password);
+      const authResult = await (likha.login as any)({ email: payload.email, password: payload.password });
       const token = (authResult as any)?.access_token || getToken() || 'likha-token';
       setToken(token);
 

@@ -1,4 +1,4 @@
-﻿import { readItems, createItem, updateItem } from '@likha-erp/likha-sdk';
+﻿import { readItems, createItem } from '@likha-erp/likha-sdk';
 import { likha } from '@/services/core/likhaClient';
 import type { CourseStudentGrade, SPRConfig } from '@/services/lms/types/lms.types';
 
