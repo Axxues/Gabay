@@ -14,13 +14,19 @@ const TOKEN_KEY = 'gabay_token';
 
 export function getToken(): string | null {
   try {
-    return localStorage.getItem(TOKEN_KEY);
+    const val = localStorage.getItem(TOKEN_KEY);
+    if (!val || val === 'undefined' || val === 'null' || val === '[object Object]') return null;
+    return val;
   } catch {
     return null;
   }
 }
 
 export function setToken(token: string): void {
+  if (!token || token === 'undefined' || token === 'null' || token === '[object Object]') {
+    clearToken();
+    return;
+  }
   localStorage.setItem(TOKEN_KEY, token);
 }
 
@@ -391,8 +397,14 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
         return { users } as unknown as T;
       }
     }
-  } catch {
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
     // Network catch
+  }
+
+  // Never fall through with empty object on auth routes
+  if (path.startsWith('/api/auth/login')) {
+    throw new ApiError(401, 'invalid_credentials', 'Invalid email or password.');
   }
 
   // Safe defaults

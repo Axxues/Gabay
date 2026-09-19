@@ -36,4 +36,12 @@ describe('apiFetch', () => {
     const err = await apiFetch('/api/x').catch(e => e);
     expect((err as ApiError).code).toBe('request_failed');
   });
+  it('clears invalid undefined/null tokens in setToken', () => {
+    setToken('undefined');
+    expect(localStorage.getItem('gabay_token')).toBeNull();
+    setToken('null');
+    expect(localStorage.getItem('gabay_token')).toBeNull();
+    setToken('');
+    expect(localStorage.getItem('gabay_token')).toBeNull();
+  });
 });

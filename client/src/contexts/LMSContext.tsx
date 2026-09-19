@@ -970,9 +970,11 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Session restore: token -> GET /api/auth/me -> user + bootstrap
-  useEffect(() => {
+    useEffect(() => {
     const token = getToken();
-    if (!token) {
+    if (!token || token === 'undefined' || token === 'null') {
+      clearToken();
+      setCurrentUser(null);
       setAuthReady(true);
       return;
     }
@@ -1014,15 +1016,18 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeUser: User = currentUser || db.users[0] || defaultGuestUser;
   const activeRole: UserRole = currentUser?.role || activeUser?.role || 'student';
 
-  const login = async (emailOrId: string, password: string): Promise<{ success: boolean; message?: string }> => {
+    const login = async (emailOrId: string, password: string): Promise<{ success: boolean; message?: string }> => {
     try {
-      const { token, user } = await apiFetch<{ token: string; user: User }>('/api/auth/login', {
+      const res = await apiFetch<{ token?: string; user?: User }>('/api/auth/login', {
         method: 'POST',
         body: { email: emailOrId, password },
       });
-      setToken(token);
-      setCurrentUser(user);
-      await refreshAll(user);
+      if (!res || !res.token || !res.user) {
+        return { success: false, message: 'Invalid email or password.' };
+      }
+      setToken(res.token);
+      setCurrentUser(res.user);
+      await refreshAll(res.user);
       return { success: true };
     } catch (err) {
       if (err instanceof ApiError) return { success: false, message: err.message };

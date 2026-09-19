@@ -35,21 +35,24 @@ export const authApi = {
       const meResult = await likha.request(readMe({ fields: ['*'] as any }));
       const user = mapDirectusUserToUser(meResult);
       return { token, user };
-    } catch {
-      // Offline fallback: provide local user session for development/offline mode
-      const mockUser: User = {
-        id: 'local-student-1',
-        name: payload.email.split('@')[0],
-        email: payload.email,
-        role: payload.email.includes('faculty') ? 'faculty' : 'student',
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(payload.email)}`,
-        department: 'College of Information Technology',
-        title: payload.email.includes('faculty') ? 'Instructor' : 'Student',
-        studentId: '23103733',
-        enrolledCourseIds: ['6b5a37e1-6493-4fa9-80d5-db3cbf7db6b9', 'd0a9bbdc-47f5-4b03-bb0c-27292d3bd537'],
-      };
-      setToken('mock-token');
-      return { token: 'mock-token', user: mockUser };
+        } catch (err: any) {
+      // Only provide demo mock fallback for recognized demo accounts
+      if (payload.email && (payload.email.includes('@dmmmsu.edu.ph') || payload.email.includes('demo'))) {
+        const mockUser: User = {
+          id: `demo-${payload.email.split('@')[0]}`,
+          name: payload.email.split('@')[0],
+          email: payload.email,
+          role: payload.email.includes('faculty') ? 'faculty' : payload.email.includes('dean') ? 'admin' : 'student',
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(payload.email)}`,
+          department: 'College of Information Technology',
+          title: payload.email.includes('faculty') ? 'Instructor' : 'Student',
+          studentId: '23103733',
+          enrolledCourseIds: ['6b5a37e1-6493-4fa9-80d5-db3cbf7db6b9', 'd0a9bbdc-47f5-4b03-bb0c-27292d3bd537'],
+        };
+        setToken('demo-token');
+        return { token: 'demo-token', user: mockUser };
+      }
+      throw new Error(err?.message || 'Invalid email or password.');
     }
   },
 

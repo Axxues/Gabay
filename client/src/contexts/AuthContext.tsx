@@ -40,7 +40,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     let active = true;
     const token = getToken();
-    if (!token) {
+    if (!token || token === 'undefined' || token === 'null') {
+      clearToken();
+      setCurrentUser(null);
       setAuthReady(true);
       return;
     }
