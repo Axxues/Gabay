@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { act, render, waitFor } from '@testing-library/react';
-import React from 'react';
 
 const facultyUser = {
   id: 'u-fac-1',
@@ -67,7 +66,7 @@ import { LMSProvider, useLMS } from '@/contexts/LMSContext';
 let doLogin: (() => Promise<any>) | null = null;
 let cachedRequests: any[] | null = null;
 
-const Probe: React.FC = () => {
+const Probe = () => {
   const { db, login } = useLMS();
   cachedRequests = db.enrollmentRequests as any[];
   doLogin = () => login('faculty1@dmmmsu.edu.ph', 'pw');

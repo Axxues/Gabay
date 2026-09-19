@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 
 const mocks = vi.hoisted(() => ({
   db: { activities: [], submissions: [] } as any,

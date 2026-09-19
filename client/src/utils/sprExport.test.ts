@@ -39,7 +39,7 @@ function roster(): User[] {
       name: 'Student One',
       email: 's1@example.com',
       courseSections: { c1: 'BSIT-1A' },
-    } as User,
+    } as unknown as User,
   ];
 }
 

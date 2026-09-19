@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
 import { InteractiveChart } from './InteractiveChart';
-import { ChartSpec } from '@/services/lms/types/chart.types';
+import type { ChartSpec } from '@/services/lms/types/chart.types';
 
 describe('InteractiveChart', () => {
   it('renders fallback when data is empty', () => {

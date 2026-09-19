@@ -23,7 +23,7 @@ describe('ragTaskStages dynamic classification', () => {
     expect(progress.tasks).toHaveLength(2);
     expect(progress.tasks[0].label).toContain('Parsing input structure & syntax');
     expect(progress.tasks[1].label).toContain('Evaluating against system vocabulary');
-    expect(progress.tasks.some((t) => t.label.includes('vector database'))).toBe(false);
+    expect(progress.tasks.some((t: { label: string }) => t.label.includes('vector database'))).toBe(false);
   });
 
   it('classifies greetings dynamically', () => {
@@ -41,7 +41,7 @@ describe('ragTaskStages dynamic classification', () => {
     expect(progress.tasks).toHaveLength(2);
     expect(progress.tasks[0].label).toContain('Evaluating conversational intent');
     expect(progress.tasks[1].label).toContain('Formulating GABAY assistant guidance');
-    expect(progress.tasks.some((t) => t.label.includes('vector database'))).toBe(false);
+    expect(progress.tasks.some((t: { label: string }) => t.label.includes('vector database'))).toBe(false);
   });
 
   it('classifies out of scope questions dynamically even with analytical phrases like "generate report"', () => {
@@ -57,8 +57,8 @@ describe('ragTaskStages dynamic classification', () => {
     expect(progress.tasks).toHaveLength(2);
     expect(progress.tasks[0].label).toContain('Coordinator Agent');
     expect(progress.tasks[1].label).toContain('Verifying school system boundaries');
-    expect(progress.tasks.some((t) => t.label.includes('vector database'))).toBe(false);
-    expect(progress.tasks.some((t) => t.label.includes('sub-agent'))).toBe(false);
+    expect(progress.tasks.some((t: { label: string }) => t.label.includes('vector database'))).toBe(false);
+    expect(progress.tasks.some((t: { label: string }) => t.label.includes('sub-agent'))).toBe(false);
   });
 
   it('classifies multi-agent enrollment analytical queries dynamically', () => {

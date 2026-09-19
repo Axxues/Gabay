@@ -248,7 +248,29 @@ function useStandaloneChatSessions(userId?: string) {
   };
 }
 
-export function useChatSessions(userId?: string) {
+export interface UseChatSessionsResult {
+  conversations: Conversation[];
+  activeSessionId: string;
+  activeConversation: Conversation;
+  startNewChat: () => string;
+  selectSession: (id: string) => void;
+  renameSession: (id: string, newTitle: string) => void;
+  deleteSession: (id: string) => void;
+  addMessage: (
+    sessionId: string,
+    message: Omit<ChatMessage, 'id' | 'timestamp'> & { id?: string; timestamp?: string; isPending?: boolean; progress?: ChatProgressMetadata | null; prompt?: string; startTime?: number }
+  ) => ChatMessage;
+  updateAssistantMessage: (
+    sessionId: string,
+    msgId: string,
+    chunk: string,
+    isComplete?: boolean,
+    chart?: ChartSpec | null
+  ) => void;
+  clearAllSessions: () => void;
+}
+
+export function useChatSessions(userId?: string): UseChatSessionsResult {
   const context = useContext(GabayChatContext);
   const standalone = useStandaloneChatSessions(userId);
   if (context && !userId) {

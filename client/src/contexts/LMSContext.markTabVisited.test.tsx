@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, test, vi, beforeEach } from 'vitest';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import { act, render, waitFor } from '@testing-library/react';
 
 const baseUser = {
   id: 'u1',
@@ -43,7 +42,7 @@ let latestVisits: Record<string, string> | undefined;
 let doLogin: (() => Promise<any>) | null = null;
 let doVisit: ((tab: string, courseId?: string) => void) | null = null;
 
-const Probe: React.FC = () => {
+const Probe = () => {
   const { activeUser, login, markTabVisited } = useLMS();
   latestVisits = (activeUser as any)?.lastVisitedAt;
   doLogin = () => login('test@example.com', 'pw');

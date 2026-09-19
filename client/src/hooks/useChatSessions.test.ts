@@ -43,7 +43,7 @@ describe('useChatSessions', () => {
     act(() => {
       result.current.deleteSession(firstId);
     });
-    expect(result.current.conversations.some((c) => c.id === firstId)).toBe(false);
+    expect(result.current.conversations.some((c: { id: string }) => c.id === firstId)).toBe(false);
   });
 
   it('appends messages and auto-titles from user prompt', () => {

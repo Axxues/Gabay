@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import React, { useEffect } from 'react';
 
 const NEW_AVATAR = '/uploads/999_new-photo.png';
 
@@ -46,7 +45,7 @@ let latestAvatar: string | null | undefined;
 let doLogin: (() => Promise<any>) | null = null;
 let doUpdate: (() => Promise<boolean>) | null = null;
 
-const Probe: React.FC = () => {
+const Probe = () => {
   const { activeUser, login, updateUser } = useLMS();
   latestAvatar = (activeUser as any)?.avatar;
   doLogin = () => login('test@example.com', 'pw');

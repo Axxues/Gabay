@@ -3,8 +3,7 @@
 // context did not provide it, every protected route rendered the loading
 // skeleton forever (undefined is falsy).
 import { describe, expect, test, vi, beforeEach } from 'vitest';
-import { act, render, waitFor } from '@testing-library/react';
-import React from 'react';
+import { render, waitFor } from '@testing-library/react';
 
 const sessionUser = {
   id: 'u9',
@@ -49,7 +48,7 @@ import { LMSProvider, useLMS } from '@/contexts/LMSContext';
 let seenAuthReady: unknown[] = [];
 let seenUserId: unknown = undefined;
 
-const Probe: React.FC = () => {
+const Probe = () => {
   const { authReady, currentUser } = useLMS();
   seenAuthReady.push(authReady);
   seenUserId = (currentUser as any)?.id;

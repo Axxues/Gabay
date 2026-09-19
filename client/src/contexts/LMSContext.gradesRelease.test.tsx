@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 import { act, render, waitFor } from '@testing-library/react';
-import React from 'react';
 
 const baseUser = {
   id: 'u1',
@@ -57,7 +56,7 @@ let latestCourses: any[] = [];
 let doLogin: (() => Promise<any>) | null = null;
 let doRelease: (() => Promise<void>) | null = null;
 
-const Probe: React.FC = () => {
+const Probe = () => {
   const ctx = useLMS() as any;
   latestCourses = ctx.db.courses;
   doLogin = () => ctx.login('test@example.com', 'pw');

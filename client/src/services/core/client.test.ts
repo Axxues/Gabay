@@ -27,13 +27,13 @@ describe('apiFetch', () => {
       ok: false, status: 401,
       json: async () => ({ error: { code: 'unauthorized', message: 'Nope.' } }),
     })));
-    const err = await apiFetch('/api/x').catch(e => e);
+    const err = await apiFetch('/api/x').catch((e: unknown) => e);
     expect(err).toBeInstanceOf(ApiError);
     expect((err as ApiError).code).toBe('unauthorized');
   });
   it('throws request_failed on non-JSON errors', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false, status: 500, json: async () => { throw new Error('bad'); } })));
-    const err = await apiFetch('/api/x').catch(e => e);
+    const err = await apiFetch('/api/x').catch((e: unknown) => e);
     expect((err as ApiError).code).toBe('request_failed');
   });
   it('clears invalid undefined/null tokens in setToken', () => {
