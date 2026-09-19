@@ -5,11 +5,26 @@ export interface RagSource {
   detail: string;
 }
 
-export type ChatProgressMetadata = {
-  stage: string;
-  message: string;
-  progress: number;
-};
+export interface TaskProgressItem {
+  id: string;
+  label: string;
+  durationMs?: number;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  error?: string;
+  nodeType?: string;
+  depth?: number;
+  parent?: string | null;
+  runsCount?: number;
+}
+
+export interface ChatProgressMetadata {
+  executionId?: number;
+  totalDurationMs: number;
+  totalTokens?: number;
+  isError?: boolean;
+  interruptedAtStageId?: string;
+  tasks: TaskProgressItem[];
+}
 
 export interface RagResponse {
   reply: string;
