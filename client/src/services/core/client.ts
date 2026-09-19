@@ -1,4 +1,4 @@
-﻿import { LIKHA_URL } from './likhaClient';
+﻿import { getLikhaUrl } from './likhaClient';
 
 export class ApiError extends Error {
   status: number;
@@ -54,7 +54,14 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
       return data as T;
     }
 
-    if (res.status === 401 || res.status === 403) {
+    if (res.status === 401 || res.status === 403 || res.status === 400) {
+      const data = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
+      const err = data?.error;
+      throw new ApiError(res.status, err?.code || 'request_failed', err?.message || `Request failed (${res.status}).`);
+    }
+
+    // If client error that is not 404, throw
+    if (res.status > 400 && res.status < 500 && res.status !== 404) {
       const data = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
       const err = data?.error;
       throw new ApiError(res.status, err?.code || 'request_failed', err?.message || `Request failed (${res.status}).`);
@@ -67,6 +74,7 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
 }
 
 async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: string | null): Promise<T> {
+  const likhaBase = getLikhaUrl();
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -74,35 +82,8 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
     // 1. Authentication
     if (path.startsWith('/api/auth/login')) {
       const payload = (options.body as any) || {};
-      const loginRes = await fetch(`${LIKHA_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: payload.email, password: payload.password }),
-      });
 
-      if (loginRes.ok) {
-        const json = await loginRes.json();
-        const access_token = json?.data?.access_token || 'likha-token';
-        const meRes = await fetch(`${LIKHA_URL}/users/me`, {
-          headers: { Authorization: `Bearer ${access_token}` },
-        });
-        const meJson = meRes.ok ? await meRes.json() : null;
-        const dUser = meJson?.data || {};
-        const name = [dUser.first_name, dUser.last_name].filter(Boolean).join(' ') || payload.email?.split('@')[0] || 'User';
-        const user = {
-          id: dUser.id || 'user-1',
-          name,
-          email: dUser.email || payload.email,
-          role: dUser.user_role || (payload.email?.includes('faculty') ? 'faculty' : 'student'),
-          avatar: dUser.avatar ? `${LIKHA_URL}/assets/${dUser.avatar}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-          studentId: dUser.student_id,
-          department: dUser.department || 'College of Information Technology',
-          title: dUser.title || 'Student',
-        };
-        return { token: access_token, user } as unknown as T;
-      }
-
-      // Quick demo fallback (for demo accounts in UI)
+      // Check quick demo accounts
       if (payload.email && (payload.email.includes('@dmmmsu.edu.ph') || payload.email.includes('demo'))) {
         const role = payload.email.includes('faculty') ? 'faculty' : payload.email.includes('dean') ? 'admin' : payload.email.includes('staff') ? 'staff' : 'student';
         const name = payload.email.split('@')[0];
@@ -119,12 +100,43 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
         return { token: 'demo-token', user: mockUser } as unknown as T;
       }
 
-      throw new ApiError(401, 'invalid_credentials', 'Invalid email or password.');
+      // Live authentication against Likha ERP (via proxy in dev)
+      const loginRes = await fetch(`${likhaBase}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: payload.email, password: payload.password }),
+      });
+
+      if (loginRes.ok) {
+        const json = await loginRes.json();
+        const access_token = json?.data?.access_token || 'likha-token';
+        const meRes = await fetch(`${likhaBase}/users/me`, {
+          headers: { Authorization: `Bearer ${access_token}` },
+        });
+        const meJson = meRes.ok ? await meRes.json() : null;
+        const dUser = meJson?.data || {};
+        const name = [dUser.first_name, dUser.last_name].filter(Boolean).join(' ') || payload.email?.split('@')[0] || 'User';
+        const user = {
+          id: dUser.id || 'user-1',
+          name,
+          email: dUser.email || payload.email,
+          role: dUser.user_role || 'student',
+          avatar: dUser.avatar ? `${likhaBase}/assets/${dUser.avatar}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+          studentId: dUser.student_id,
+          department: dUser.department || 'College of Information Technology',
+          title: dUser.title || 'Student',
+        };
+        return { token: access_token, user } as unknown as T;
+      }
+
+      const errJson = await loginRes.json().catch(() => null);
+      const errMsg = errJson?.errors?.[0]?.message || 'Invalid email or password.';
+      throw new ApiError(401, 'invalid_credentials', errMsg);
     }
 
     if (path.startsWith('/api/auth/me')) {
       if (token && token !== 'demo-token' && token !== 'mock-token') {
-        const meRes = await fetch(`${LIKHA_URL}/users/me`, {
+        const meRes = await fetch(`${likhaBase}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (meRes.ok) {
@@ -137,7 +149,7 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
               name,
               email: dUser.email,
               role: dUser.user_role || 'student',
-              avatar: dUser.avatar ? `${LIKHA_URL}/assets/${dUser.avatar}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
+              avatar: dUser.avatar ? `${likhaBase}/assets/${dUser.avatar}` : `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
               studentId: dUser.student_id,
               department: dUser.department || 'College of Information Technology',
               title: dUser.title || 'Student',
@@ -149,7 +161,7 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
 
     // 2. Courses
     if (path.startsWith('/api/courses')) {
-      const res = await fetch(`${LIKHA_URL}/items/courses?limit=100`, { headers });
+      const res = await fetch(`${likhaBase}/items/courses?limit=100`, { headers });
       if (res.ok) {
         const json = await res.json();
         const courses = (json.data || []).map((item: any) => ({
@@ -172,7 +184,7 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
 
     // 3. Calendar
     if (path.startsWith('/api/calendar')) {
-      const res = await fetch(`${LIKHA_URL}/items/calendar_events?limit=100`, { headers });
+      const res = await fetch(`${likhaBase}/items/calendar_events?limit=100`, { headers });
       if (res.ok) {
         const json = await res.json();
         const events = (json.data || []).map((e: any) => ({
@@ -189,7 +201,7 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
 
     // 4. Messages
     if (path.startsWith('/api/messages')) {
-      const res = await fetch(`${LIKHA_URL}/items/messages?limit=100`, { headers });
+      const res = await fetch(`${likhaBase}/items/messages?limit=100`, { headers });
       if (res.ok) {
         const json = await res.json();
         return { messages: json.data || [] } as unknown as T;
@@ -198,7 +210,7 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
 
     // 5. Assessments
     if (path.startsWith('/api/quizzes')) {
-      const res = await fetch(`${LIKHA_URL}/items/assessments?filter[type][_eq]=quiz`, { headers });
+      const res = await fetch(`${likhaBase}/items/assessments?filter[type][_eq]=quiz`, { headers });
       if (res.ok) {
         const json = await res.json();
         return { quizzes: json.data || [] } as unknown as T;
@@ -206,7 +218,7 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
     }
 
     if (path.startsWith('/api/activities')) {
-      const res = await fetch(`${LIKHA_URL}/items/assessments?filter[type][_eq]=activity`, { headers });
+      const res = await fetch(`${likhaBase}/items/assessments?filter[type][_eq]=activity`, { headers });
       if (res.ok) {
         const json = await res.json();
         return { activities: json.data || [] } as unknown as T;
@@ -214,7 +226,7 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
     }
 
     if (path.startsWith('/api/exams')) {
-      const res = await fetch(`${LIKHA_URL}/items/assessments?filter[type][_eq]=exam`, { headers });
+      const res = await fetch(`${likhaBase}/items/assessments?filter[type][_eq]=exam`, { headers });
       if (res.ok) {
         const json = await res.json();
         return { exams: json.data || [] } as unknown as T;

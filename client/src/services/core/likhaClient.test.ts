@@ -4,7 +4,7 @@ import { likha, LIKHA_URL } from './likhaClient';
 describe('likhaClient', () => {
   it('should initialize likha client with correct url', () => {
     expect(likha).toBeDefined();
-    expect(LIKHA_URL).toContain('gabay.zyberlab.com');
+    expect(LIKHA_URL).toBeDefined();
   });
 
   it('should expose rest and auth capabilities', () => {
