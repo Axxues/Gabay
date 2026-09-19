@@ -8,7 +8,7 @@ describe('edit-account navigation', () => {
   });
 
   it('EditAccountPage module exists and exports the page component', async () => {
-    const mod = await import('../pages/EditAccountPage');
+    const mod = await import('@/features/accounts/pages/EditAccountPage');
     expect(mod.EditAccountPage).toBeDefined();
   });
 });

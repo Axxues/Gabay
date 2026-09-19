@@ -7,6 +7,7 @@ export function settledValue<T>(r: PromiseSettledResult<T>, fallback: T): T {
 }
 
 const lazyImportCache = new Map<string, Promise<{ default: ComponentType<never> }>>();
+let lazyImportCounter = 0;
 
 /**
  * Wrapper around `React.lazy` that retries a failed dynamic import once
@@ -17,10 +18,15 @@ export function lazyWithRetry<T extends ComponentType<any>>(
   importer: () => Promise<{ default: T }>,
   cacheKey?: string,
 ) {
-  const key = cacheKey ?? importer.toString();
+  const key = cacheKey ?? `lazyWithRetry:${lazyImportCounter++}`;
   let cached = lazyImportCache.get(key);
   if (!cached) {
-    cached = importer().catch(() => importer()) as Promise<{ default: ComponentType<never> }>;
+    const pending = importer().catch(() => importer()) as Promise<{ default: ComponentType<never> }>;
+    // Drop failed loads so a later mount retries instead of reusing the rejection.
+    void pending.catch(() => {
+      if (lazyImportCache.get(key) === pending) lazyImportCache.delete(key);
+    });
+    cached = pending;
     lazyImportCache.set(key, cached);
   }
   const promise = cached as Promise<{ default: T }>;

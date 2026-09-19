@@ -132,8 +132,8 @@ export const Layout: React.FC = () => {
       <GlobalSearchDialog
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}
-        onNavigateCourse={(id, sub) => { nav.handleNavigateCourse(id, sub); setSearchOpen(false); }}
-        onNavigateTab={(t) => { nav.handleNavigateTab(t); setSearchOpen(false); }}
+        onNavigateCourse={(id: string, sub?: string) => { nav.handleNavigateCourse(id, sub); setSearchOpen(false); }}
+        onNavigateTab={(t: string) => { nav.handleNavigateTab(t); setSearchOpen(false); }}
       />
       <RoleSwitcherModal />
       <SpeedGraderModal />
