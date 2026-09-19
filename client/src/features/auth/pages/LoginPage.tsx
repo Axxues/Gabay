@@ -46,17 +46,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuickLogin = (email: string) => {
-    setIdentifier(email);
-    setPassword('gabay2026');
-    setErrorMessage('');
-    setIsLoading(true);
-    setTimeout(async () => {
-      await login(email, 'gabay2026');
-      setIsLoading(false);
-    }, 200);
-  };
-
   return (
     <div className="min-h-screen bg-muted flex items-center justify-center p-4 relative overflow-hidden text-foreground select-none font-sans">
       {/* Subtle Background Glows */}
@@ -199,46 +188,10 @@ export const LoginPage: React.FC = () => {
             )}
           </button>
         </form>
-
-        {/* Clean Demo Accounts */}
-        <div className="pt-3 border-t border-border space-y-2">
-          <span className="text-[12px] font-semibold text-muted-foreground block text-center font-sans">
-            Quick demo login
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('dean1@dmmmsu.edu.ph')}
-              className="py-1.5 px-2 bg-muted/50 hover:bg-primary/10 hover:border-primary/30 border border-border rounded-lg text-xs font-semibold text-foreground transition-all text-center cursor-pointer"
-            >
-              Dean 1
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('faculty1@dmmmsu.edu.ph')}
-              className="py-1.5 px-2 bg-muted/50 hover:bg-primary/10 hover:border-primary/30 border border-border rounded-lg text-xs font-semibold text-foreground transition-all text-center cursor-pointer"
-            >
-              Faculty 1
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('staff1@dmmmsu.edu.ph')}
-              className="py-1.5 px-2 bg-muted/50 hover:bg-primary/10 hover:border-primary/30 border border-border rounded-lg text-xs font-semibold text-foreground transition-all text-center cursor-pointer"
-            >
-              Staff 1
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin('student1@dmmmsu.edu.ph')}
-              className="py-1.5 px-2 bg-muted/50 hover:bg-primary/10 hover:border-primary/30 border border-border rounded-lg text-xs font-semibold text-foreground transition-all text-center cursor-pointer"
-            >
-              Student 1
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
 
 export default LoginPage;
+

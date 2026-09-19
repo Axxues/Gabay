@@ -419,7 +419,7 @@ export const CreateAccountPage: React.FC<CreateAccountPageProps> = ({ onNavigate
               <div className="flex items-center space-x-3">
                 <UserAvatar
                   name={formEmail.trim() || 'name@dmmmsu.edu.ph'}
-                  src=""
+                  src={undefined}
                   className="w-10 h-10 rounded-full object-cover border border-border shadow-xs shrink-0"
                 />
                 <div className="min-w-0">

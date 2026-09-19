@@ -68,14 +68,10 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
       return data as T;
     }
 
-        if (!res.ok && res.status !== 404) {
-      const data = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
-      const err = data?.error;
-      throw new ApiError(res.status, err?.code || 'request_failed', err?.message || `Request failed (${res.status}).`);
-    }
-
-    // If client error that is not 404, throw
-    if (res.status > 400 && res.status < 500 && res.status !== 404) {
+    if (res.status === 404) {
+      // 404 from Vite dev server means no local backend route — fall through
+      // to the Likha ERP resolver which provides safe defaults.
+    } else {
       const data = (await res.json().catch(() => null)) as { error?: { code?: string; message?: string } } | null;
       const err = data?.error;
       throw new ApiError(res.status, err?.code || 'request_failed', err?.message || `Request failed (${res.status}).`);
@@ -96,23 +92,6 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
     // 1. Authentication
     if (path.startsWith('/api/auth/login')) {
       const payload = (options.body as any) || {};
-
-      // Check quick demo accounts
-      if (payload.email && (payload.email.includes('@dmmmsu.edu.ph') || payload.email.includes('demo'))) {
-        const role = payload.email.includes('faculty') ? 'faculty' : payload.email.includes('dean') ? 'admin' : payload.email.includes('staff') ? 'staff' : 'student';
-        const name = payload.email.split('@')[0];
-        const mockUser = {
-          id: `demo-${name}`,
-          name: name.charAt(0).toUpperCase() + name.slice(1),
-          email: payload.email,
-          role,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`,
-          department: 'College of Information Technology',
-          title: role === 'faculty' ? 'Instructor' : role === 'admin' ? 'Dean' : 'Student',
-          studentId: '23103733',
-        };
-        return { token: 'demo-token', user: mockUser } as unknown as T;
-      }
 
       // Live authentication against Likha ERP (via proxy in dev)
       const loginRes = await fetch(`${likhaBase}/auth/login`, {
@@ -149,7 +128,7 @@ async function resolveLikhaRoute<T>(path: string, options: ApiOptions, token: st
     }
 
     if (path.startsWith('/api/auth/me')) {
-      if (token && token !== 'demo-token' && token !== 'mock-token') {
+      if (token) {
         const meRes = await fetch(`${likhaBase}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });

@@ -25,6 +25,7 @@ import type { SPRColumn } from '@/services/lms/types/lms.types';
 import type { TermId } from '@/utils/gradingTerms';
 import { normalizeTermId } from '@/utils/gradingTerms';
 import { TERM_LABELS } from '@/components/shared/TermSelect';
+import { UserAvatar } from '@/components/shared/UserAvatar';
 import { exportSPRToExcel } from '@/utils/sprExport';
 
 interface FacultyGradebookProps {
@@ -658,9 +659,9 @@ export const FacultyGradebook: React.FC<FacultyGradebookProps> = ({ courseId, on
                       <tr key={student.id} className="hover:bg-muted/40 transition-colors">
                         <td className="px-5 py-3.5 font-semibold text-[14px] tracking-tight text-foreground sticky left-0 bg-card z-10">
                           <div className="flex items-center space-x-2.5">
-                            <img
+                            <UserAvatar
+                              name={student.name}
                               src={student.avatar}
-                              alt={student.name}
                               className="w-7 h-7 rounded-full object-cover border border-border shrink-0"
                             />
                             <div className="min-w-0">
