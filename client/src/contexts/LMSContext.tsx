@@ -1002,8 +1002,17 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const isAuthenticated = currentUser !== null;
-  const activeUser = currentUser || db.users[0];
-  const activeRole: UserRole = currentUser?.role || 'student';
+  const defaultGuestUser: User = {
+    id: 'guest',
+    name: 'Guest User',
+    email: 'guest@dmmmsu.edu.ph',
+    role: 'student',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=256',
+    department: 'College of Information Technology',
+    title: 'Student',
+  };
+  const activeUser: User = currentUser || db.users[0] || defaultGuestUser;
+  const activeRole: UserRole = currentUser?.role || activeUser?.role || 'student';
 
   const login = async (emailOrId: string, password: string): Promise<{ success: boolean; message?: string }> => {
     try {
