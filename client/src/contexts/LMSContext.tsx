@@ -363,9 +363,10 @@ export const generateCourseJoinCode = (existingCourses: Course[] = [], prefix?: 
 
 /** Upsert one enrollment request into a database snapshot (Task 2 cache scope). */
 export const mergeEnrollmentRequest = (prev: LMSDatabase, request: EnrollmentRequest): LMSDatabase => {
-  const existing = prev.enrollmentRequests || [];
-  if (existing.some(r => r.id === request.id)) {
-    return { ...prev, enrollmentRequests: existing.map(r => (r.id === request.id ? request : r)) };
+  if (!request || !request.id) return prev;
+  const existing = (prev.enrollmentRequests || []).filter(Boolean);
+  if (existing.some(r => r && r.id === request.id)) {
+    return { ...prev, enrollmentRequests: existing.map(r => (r && r.id === request.id ? request : r)) };
   }
   return { ...prev, enrollmentRequests: [...existing, request] };
 };
@@ -1919,9 +1920,10 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
+    const studentId = activeUser?.studentId || activeUser?.id;
     const existingPending = targetCourse
       ? (db.enrollmentRequests || []).find(
-        r => r.studentId === activeUser.id && r.courseId === targetCourse.id && r.status === 'pending'
+        r => r && (r.studentId === studentId || r.studentId === activeUser?.id) && r.courseId === targetCourse.id && r.status === 'pending'
       )
       : undefined;
     if (targetCourse && existingPending) {
@@ -4306,15 +4308,17 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const getPendingRequestsForStudent = (): EnrollmentRequest[] => {
+    const studentId = activeUser?.studentId || activeUser?.id;
     return (db.enrollmentRequests || []).filter(
-      (r: EnrollmentRequest) => r.studentId === activeUser.id && r.status === 'pending' && (r.type === 'faculty_enroll' || r.type === 'self_join' || r.type === 'section_switch')
+      (r: EnrollmentRequest) => r && (r.studentId === studentId || r.studentId === activeUser?.id) && r.status === 'pending' && (r.type === 'faculty_enroll' || r.type === 'self_join' || r.type === 'section_switch')
     );
   };
 
   const requestJoinCourse = async (courseId: string): Promise<boolean> => {
     if (activeRole === 'faculty' || activeRole === 'admin') return false;
+    const studentId = activeUser?.studentId || activeUser?.id;
     const mine = (db.enrollmentRequests || []).filter(
-      (r: EnrollmentRequest) => r.studentId === activeUser.id && r.courseId === courseId
+      (r: EnrollmentRequest) => r && (r.studentId === studentId || r.studentId === activeUser?.id) && r.courseId === courseId
     );
     if (mine.some((r: EnrollmentRequest) => r.status === 'pending')) return false;
     if (
@@ -4331,8 +4335,9 @@ export const LMSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const getMyRequest = (courseId: string): EnrollmentRequest | null => {
+    const studentId = activeUser?.studentId || activeUser?.id;
     const mine = (db.enrollmentRequests || []).filter(
-      (r: EnrollmentRequest) => r.studentId === activeUser.id && r.courseId === courseId
+      (r: EnrollmentRequest) => r && (r.studentId === studentId || r.studentId === activeUser?.id) && r.courseId === courseId
     );
     return mine.length > 0 ? mine[mine.length - 1] : null;
   };
