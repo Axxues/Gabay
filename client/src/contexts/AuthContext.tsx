@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import type { User, UserRole } from '@/services/lms/types/lms.types';
 import { getToken, setToken, clearToken } from '@/services/core/client';
 import { authApi } from '@/services/auth/api/auth.api';
@@ -74,7 +74,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
     setLastError(null);
     try {
-      const res = await authApi.login({ username: emailOrId, password });
+      const res = await authApi.login({ email: emailOrId, password });
       if (res.token && res.user) {
         setToken(res.token);
         setCurrentUser(res.user as User);
