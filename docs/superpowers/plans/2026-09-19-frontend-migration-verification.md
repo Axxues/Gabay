@@ -25,18 +25,19 @@ Gate per binding ruling: tsc = NO-NEW-ERRORS vs the 13-error pre-existing baseli
 - Any error NOT in the baseline: **none**. No `TS2307 cannot find module` — all `@/`
   imports and router lazy paths resolve.
 
-## 3. Vitest totals (PASS with documented delta)
+## 3. Vitest totals (PASS — full parity after fix round)
 
-- New tree `npx vitest run`: **40 files / 239 tests, all pass**.
+- New tree `npx vitest run`: **48 files / 252 tests, all pass** — exact parity with prototype.
 - Prototype `npx vitest run`: **48 files / 252 tests, all pass**.
-- Delta = exactly the 8 test files never present in any task brief's file list
-  (verified: running just those 8 in the prototype yields 8 files / 13 tests = the full
-  252−239 gap; all pass there):
-  `src/api/client.test.ts`, `src/api/rag.test.ts`,
-  `src/components/layout/AppRail.test.tsx`, and 5× `src/context/LMSContext.*.test.tsx`
-  (authReady, enrollmentScope, gradesRelease, markTabVisited, updateUser).
-- Zero regressions in the 40 migrated files. Follow-up: migrate those 8 tests
-  (out of scope for Task 7 — brief allowed modifying nothing except this log + boundary).
+- Fix round (commit `test: migrate remaining 8 suites to new tree`): the 8 suites missing
+  from all prior briefs were migrated with import-rewrites only, zero assertion changes —
+  `src/services/core/client.test.ts`, `src/services/ai-chat/api/rag.test.ts`
+  (`sendRagMessage` → `ragApi.sendMessage`, verified same endpoint/signature per Task 4;
+  `describe` label renamed to match, no `expect` touched), `src/layouts/AppRail.test.tsx`,
+  and 5× `src/contexts/LMSContext.*.test.tsx`. All `vi.mock` paths rewritten to the exact
+  `@/` specifiers the new sources import (`@/services/core/client`,
+  `@/contexts/LMSContext`), so mocks intercept; new `LMSContext` confirmed to import
+  `@/services/core/client` (line 47).
 
 ## 4. Architecture-compliance greps (PowerShell 5.1 has no `Select-String -Recurse`,
 all runs below use the equivalent `Get-ChildItem -Recurse | Select-String`)
