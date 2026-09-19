@@ -38,6 +38,14 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
+  const isMockedFetch = typeof (fetch as any)?.mock === 'object';
+
+  // In live browser execution without a local backend daemon, internal /api/ routes
+  // route directly to Likha ERP to avoid making doomed HTTP calls to Vite that print 404 to DevTools
+  if (!isMockedFetch && path.startsWith('/api/')) {
+    return resolveLikhaRoute<T>(path, options, token);
+  }
+
   try {
     const res = await fetch(path, {
       method: options.method || 'GET',
