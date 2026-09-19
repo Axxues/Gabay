@@ -1,7 +1,7 @@
 import React from 'react';
 import { BookOpen } from 'lucide-react';
 import { EmptyState } from '@/components/shared/EmptyState';
-import { JoinCourseModal } from '@/features/courses/components/enrollment/JoinCourseModal';
+import { JoinCourseModal } from '@/components/shared/JoinCourseModal';
 
 interface UnenrolledStateProps {
   showJoinAction: boolean;

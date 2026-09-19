@@ -97,3 +97,28 @@ all runs below use the equivalent `Get-ChildItem -Recurse | Select-String`)
 
 - Prototype repo untouched by this task (only reads; its dirty tree is pre-existing
   third-party work). New repo `git status` before commit: only `M src/app/App.tsx` + this log.
+
+## Fix wave (final review)
+
+- (a) `src/services/messaging/` → `src/services/inbox/` (`git mv` the dir; both
+  `api/index.ts` + `types/index.ts` are empty `export {}` barrels, contents untouched).
+  Grep verified zero importers of `@/services/messaging` before and after — no consumer
+  updates needed, no duplication.
+- (b) Component moves: `SourceFilterSelect.tsx` from
+  `src/features/courses/components/filters/` → `src/features/assessments/components/filters/`
+  (both consumers — `ActivitiesView`, `QuizzesView` — live in assessments; Task 6
+  misplacement; 2 consumer imports updated; now-empty `courses/.../filters/` dir removed);
+  `JoinCourseModal.tsx` from `src/features/courses/components/enrollment/` →
+  `src/components/shared/` (consumed by 2 features: dashboard + courses; 3 consumers
+  updated: `features/dashboard/pages/DashboardPage.tsx`,
+  `features/courses/pages/CoursesPage.tsx`,
+  `features/courses/components/enrollment/UnenrolledState.tsx` — all now import
+  `@/components/shared/JoinCourseModal`; moved file's own imports were already `@/`,
+  untouched). Accepted exception: orchestrator pages (`CoursesPage`, `DashboardPage`) may
+  compose cross-slice views.
+- (c) Explicit build-gate exemption: `npm run build` runs `tsc -b` which fails on the 13
+  pre-existing contract errors (`isSyncing` ×8, `User.banner` ×5); `npx vite build` +
+  `npx tsc --noEmit`-vs-baseline are the gates until that contract debt is fixed (fixing it
+  would change logic/contracts — out of scope).
+- (d) Open human follow-up: browser click-through (logged-out `/dashboard`→`/login`, login,
+  post-login modules view) — dev smoke so far is HTTP-only.

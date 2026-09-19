@@ -11,7 +11,7 @@ import { FilesView } from './FilesView';
 import { FacultyGradebook } from '@/features/grading/components/gradebook/FacultyGradebook';
 import { StudentGradebook } from '@/features/grading/components/gradebook/StudentGradebook';
 
-import { JoinCourseModal } from '@/features/courses/components/enrollment/JoinCourseModal';
+import { JoinCourseModal } from '@/components/shared/JoinCourseModal';
 import { CourseTabBar } from '@/features/courses/components/course-tabs/CourseTabBar';
 import { UnenrolledState } from '@/features/courses/components/enrollment/UnenrolledState';
 import { PageTransition } from '@/components/shared/PageTransition';

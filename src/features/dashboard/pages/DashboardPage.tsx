@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLMS } from '@/contexts/LMSContext';
 import type { EnrollmentRequest } from '@/services/lms/types/lms.types';
 import { getDisplaySectionName } from '@/utils/sections';
-import { JoinCourseModal } from '@/features/courses/components/enrollment/JoinCourseModal';
+import { JoinCourseModal } from '@/components/shared/JoinCourseModal';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { EmptyState } from '@/components/shared/EmptyState';
 import {

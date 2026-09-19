@@ -3,7 +3,7 @@ import { useLMS } from '@/contexts/LMSContext';
 import type { TermId } from '@/services/lms/types/lms.types';
 import { normalizeTermId } from '@/utils/gradingTerms';
 import { TERM_LABELS, TermFilterSelect } from '@/components/shared/TermSelect';
-import { SourceFilterSelect } from '@/features/courses/components/filters/SourceFilterSelect';
+import { SourceFilterSelect } from '@/features/assessments/components/filters/SourceFilterSelect';
 import {
   buildAssessmentSourceIndex,
   matchesSourceFilter,
